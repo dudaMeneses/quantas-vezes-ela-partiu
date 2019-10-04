@@ -1,0 +1,10 @@
+google:
+  key: AIzaSyCI89nDsBe9ouX6HycmgniG7rL_fMqC6TA
+  directions.api: https://maps.googleapis.com/maps/api/directions/json?origin={from}&destination={to}&key=${key}
+
+spotify:
+  id: 182709773b434e4ea208031786e1c227
+  secret: 3396f329ce7b49139050d5754d4ea648
+  song.id: 1uSTmyzNeDR69JUKX72vvU
+  token.api: https://accounts.spotify.com/api/token
+  track.api: https://api.spotify.com/v1/tracks/${song.id}
