@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(path = "v1/ela-partiu", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -24,7 +25,7 @@ public class ElaPartiuController {
     public Mono<QuantasVezesResponse> quantasVezes(
             @RequestParam("from") String from,
             @RequestParam("to") String to
-    ) throws IOException {
+    ) throws IOException, ExecutionException, InterruptedException {
         return elaPartiuService.quantasVezes(ElaPartiuRequestBuilder.builder().from(from).to(to).build());
     }
 

@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class ElaPartiuService {
@@ -24,7 +25,10 @@ public class ElaPartiuService {
 
     public Mono<QuantasVezesResponse> quantasVezes(ElaPartiuRequestBuilder request) throws IOException {
         return Mono.just(
-                QuantasVezesResponse.builder().musica("Tim Maia - Ela Partiu").vezes(getQuantasVezesElaPartiu(request)).build()
+                QuantasVezesResponse.builder()
+                        .musica("Tim Maia - Ela Partiu")
+                        .vezes(getQuantasVezesElaPartiu(request))
+                        .build()
         );
     }
 
@@ -57,14 +61,14 @@ public class ElaPartiuService {
     }
 
     private Long getGoogleDirections(ElaPartiuRequestBuilder request) throws IOException {
-        String googleDirectionJson = WebClient.create(googleMapsProperties.getDirectionsUrl())
+        String json = WebClient.create(googleMapsProperties.getDirectionsUrl())
                 .get()
                 .uri(googleMapsProperties.getDirectionsUrl(), request.getFrom(), request.getTo())
                 .retrieve()
                 .bodyToMono(String.class)
                 .toProcessor().peek();
 
-        return new ObjectMapper().readTree(googleDirectionJson)
+        return new ObjectMapper().readTree(json)
                 .path("routes").get(0)
                 .path("legs").get(0)
                 .path("duration").get("value").longValue();
