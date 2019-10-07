@@ -1,4 +1,4 @@
-package com.duda.quantasvezeselapartiu.component;
+package com.duda.quantasvezeselapartiu.property;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,11 +8,15 @@ import org.springframework.stereotype.Component;
 
 @Getter
 @Component
-@ConfigurationProperties("google")
+@ConfigurationProperties("spotify")
 @PropertySource(value="classpath:external.yml")
-public class GoogleMapsProperties {
+public class SpotifyProperties {
+    @Value("${id}:${secret}")
+    private String idSecret;
 
-    @Value("${directions.api}")
-    private String directionsUrl;
+    @Value("${token.api}")
+    private String tokenUrl;
 
+    @Value("${track.api}")
+    private String trackUrl;
 }
