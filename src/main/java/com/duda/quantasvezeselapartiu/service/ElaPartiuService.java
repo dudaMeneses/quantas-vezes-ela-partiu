@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.springframework.web.reactive.function.BodyInserters.fromFormData;
+
 @Service
 public class ElaPartiuService {
 
@@ -23,7 +25,10 @@ public class ElaPartiuService {
     @Autowired
     private GoogleMapsProperties googleMapsProperties;
 
-    public Mono<QuantasVezesResponse> quantasVezes(ElaPartiuRequestBuilder request) throws IOException {
+    @Autowired
+    private ObjectMapper mapper;
+
+    public Mono<QuantasVezesResponse> quantasVezes(ElaPartiuRequestBuilder request) {
         return Mono.just(
                 QuantasVezesResponse.builder()
                         .musica("Tim Maia - Ela Partiu")
@@ -32,45 +37,75 @@ public class ElaPartiuService {
         );
     }
 
-    private double getQuantasVezesElaPartiu(ElaPartiuRequestBuilder request) throws IOException {
-        return (double) getGoogleDirections(request) / getSpotifyElaPartiuDuration();
+    private double getQuantasVezesElaPartiu(ElaPartiuRequestBuilder request) {
+        return getGoogleDirections(request).doubleValue() / getSpotifyElaPartiuDuration();
     }
 
-    private Long getSpotifyElaPartiuDuration() throws IOException {
-        String elaPartiuJson = WebClient.create(spotifyProperties.getTrackUrl())
-                .get()
-                .header("Authorization", "Bearer " + getSpotifyAccessToken())
-                .retrieve()
-                .bodyToMono(String.class)
-                .toProcessor().peek();
+    private Long getSpotifyElaPartiuDuration() {
+        AtomicReference<Long> musicDuration = new AtomicReference<>(0L);
 
-        return new ObjectMapper().readTree(elaPartiuJson).path("duration_ms").asLong() / 1000;
+        getSpotifyAccessToken().subscribe(token ->
+                WebClient.builder()
+                    .baseUrl(spotifyProperties.getTrackUrl())
+                    .defaultHeader("Authorization", "Bearer " + token)
+                    .build()
+                    .get()
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(content -> {
+                        try {
+                            return mapper.readTree(content);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .map(jsonNode -> jsonNode.get("duration_ms").asLong() / 1000)
+                    .subscribe(musicDuration::set)
+        );
+
+        return musicDuration.get();
     }
 
-    private String getSpotifyAccessToken() throws IOException {
-        String spotifyToken = WebClient.create(spotifyProperties.getTokenUrl())
+    private Mono<String> getSpotifyAccessToken() {
+        return WebClient.builder()
+                .baseUrl(spotifyProperties.getTokenUrl())
+                .defaultHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(spotifyProperties.getIdSecret().getBytes()))
+                .defaultHeader("Content-Type", "application/x-www-form-urlencoded")
+                .build()
                 .post()
-                .header("Authorization", "Basic " + Base64.getEncoder().encodeToString(spotifyProperties.getIdSecret().getBytes()))
-                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(fromFormData("grant_type", "client_credentials"))
                 .retrieve()
                 .bodyToMono(String.class)
-                .toProcessor().peek();
-
-        return new ObjectMapper().readTree(spotifyToken)
-                .path("access_token").asText();
+                .map(content -> {
+                    try {
+                        return mapper.readTree(content);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(jsonNode -> jsonNode.path("access_token").asText());
     }
 
-    private Long getGoogleDirections(ElaPartiuRequestBuilder request) throws IOException {
-        String json = WebClient.create(googleMapsProperties.getDirectionsUrl())
-                .get()
-                .uri(googleMapsProperties.getDirectionsUrl(), request.getFrom(), request.getTo())
-                .retrieve()
-                .bodyToMono(String.class)
-                .toProcessor().peek();
+    private Long getGoogleDirections(ElaPartiuRequestBuilder request) {
+        AtomicReference<Long> travelDuration = new AtomicReference<>(0L);
 
-        return new ObjectMapper().readTree(json)
-                .path("routes").get(0)
-                .path("legs").get(0)
-                .path("duration").get("value").longValue();
+        WebClient.create(googleMapsProperties.getDirectionsUrl())
+            .get()
+            .uri(googleMapsProperties.getDirectionsUrl(), request.getFrom(), request.getTo())
+            .retrieve()
+            .bodyToMono(String.class)
+            .map(content -> {
+                try {
+                    return mapper.readTree(content);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .map(jsonNode -> jsonNode.path("routes").get(0))
+            .map(jsonNode -> jsonNode.path("legs").get(0))
+            .map(jsonNode -> jsonNode.path("duration").get("value").longValue())
+            .subscribe(travelDuration::set);
+
+        return travelDuration.get();
     }
 }
