@@ -7,14 +7,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromFormData;
 
 @Component
-public class SpotifyClient {
+public class SpotifyClient implements JsonReader {
 
     @Autowired
     private SpotifyProperties spotifyProperties;
@@ -33,13 +32,7 @@ public class SpotifyClient {
                         .get()
                         .retrieve()
                         .bodyToMono(String.class)
-                        .map(content -> {
-                            try {
-                                return mapper.readTree(content);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        })
+                        .map(content -> contentToNode(mapper, content))
                         .map(jsonNode -> jsonNode.get("duration_ms").asLong() / 1000)
                         .subscribe(musicDuration::set)
         );
@@ -57,13 +50,7 @@ public class SpotifyClient {
                 .body(fromFormData("grant_type", "client_credentials"))
                 .retrieve()
                 .bodyToMono(String.class)
-                .map(content -> {
-                    try {
-                        return mapper.readTree(content);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+                .map(content -> contentToNode(mapper, content))
                 .map(jsonNode -> jsonNode.path("access_token").asText());
     }
 }
