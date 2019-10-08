@@ -27,7 +27,7 @@ public class ElaPartiuService {
                 QuantasVezesResponse.builder()
                         .musica(tuple.getT1().getName())
                         .vezes(
-                                new BigDecimal(tuple.getT2().doubleValue() / (tuple.getT1().getDuration() / 1000))
+                                new BigDecimal(tuple.getT2().doubleValue() / (tuple.getT1().getDuration() / 1000D))
                                         .setScale(2, RoundingMode.HALF_UP)
                                         .doubleValue()
                         )
