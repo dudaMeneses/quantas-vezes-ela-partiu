@@ -1,7 +1,7 @@
 # Quantas Vezes Ela Partiu
 Reactive application to figure out how many times ``Tim Maia - Ela Partiu`` song would be played from a location to another location.
 
-## Need to create
+## Need to Create
 To make this project work you'll need to create ``resources/external.yml`` file with the following information inside:
 ```yaml
 google:
@@ -15,3 +15,8 @@ spotify:
   token.api: https://accounts.spotify.com/api/token
   track.api: https://api.spotify.com/v1/tracks/${song.id}
 ```
+
+## Tech Stack
+- Java 11
+- Spring-Boot (WebFlux)
+- Lombok
