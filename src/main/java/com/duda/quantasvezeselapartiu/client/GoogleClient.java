@@ -1,7 +1,7 @@
 package com.duda.quantasvezeselapartiu.client;
 
 import com.duda.quantasvezeselapartiu.model.request.ElaPartiuRequestBuilder;
-import com.duda.quantasvezeselapartiu.property.GoogleProperties;
+import com.duda.quantasvezeselapartiu.configuration.property.GoogleProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

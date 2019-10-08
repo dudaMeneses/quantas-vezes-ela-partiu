@@ -2,7 +2,7 @@ package com.duda.quantasvezeselapartiu.client;
 
 import com.duda.quantasvezeselapartiu.model.response.SpotifyMusic;
 import com.duda.quantasvezeselapartiu.model.response.SpotifyToken;
-import com.duda.quantasvezeselapartiu.property.SpotifyProperties;
+import com.duda.quantasvezeselapartiu.configuration.property.SpotifyProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
