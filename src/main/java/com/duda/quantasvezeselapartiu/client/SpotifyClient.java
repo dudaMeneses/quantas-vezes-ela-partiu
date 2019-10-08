@@ -1,14 +1,14 @@
 package com.duda.quantasvezeselapartiu.client;
 
+import com.duda.quantasvezeselapartiu.model.response.SpotifyMusic;
+import com.duda.quantasvezeselapartiu.model.response.SpotifyToken;
 import com.duda.quantasvezeselapartiu.property.SpotifyProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Base64;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromFormData;
 
@@ -18,29 +18,19 @@ public class SpotifyClient implements JsonReader {
     @Autowired
     private SpotifyProperties spotifyProperties;
 
-    @Autowired
-    private ObjectMapper mapper;
-
-    public Long getSpotifyElaPartiuDuration() {
-        AtomicReference<Long> musicDuration = new AtomicReference<>(255L);
-
-        getSpotifyAccessToken().subscribe(token ->
+    public Mono<SpotifyMusic> getSpotifyElaPartiu() {
+        return getSpotifyAccessToken().flatMap(token ->
                 WebClient.builder()
                         .baseUrl(spotifyProperties.getTrackUrl())
-                        .defaultHeader("Authorization", "Bearer " + token)
+                        .defaultHeader("Authorization", "Bearer " + token.getToken())
                         .build()
                         .get()
                         .retrieve()
-                        .bodyToMono(String.class)
-                        .map(content -> contentToNode(mapper, content))
-                        .map(jsonNode -> jsonNode.get("duration_ms").asLong() / 1000)
-                        .subscribe(musicDuration::set)
+                        .bodyToMono(SpotifyMusic.class)
         );
-
-        return musicDuration.get();
     }
 
-    private Mono<String> getSpotifyAccessToken() {
+    private Mono<SpotifyToken> getSpotifyAccessToken() {
         return WebClient.builder()
                 .baseUrl(spotifyProperties.getTokenUrl())
                 .defaultHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(spotifyProperties.getIdSecret().getBytes()))
@@ -49,8 +39,6 @@ public class SpotifyClient implements JsonReader {
                 .post()
                 .body(fromFormData("grant_type", "client_credentials"))
                 .retrieve()
-                .bodyToMono(String.class)
-                .map(content -> contentToNode(mapper, content))
-                .map(jsonNode -> jsonNode.path("access_token").asText());
+                .bodyToMono(SpotifyToken.class);
     }
 }
