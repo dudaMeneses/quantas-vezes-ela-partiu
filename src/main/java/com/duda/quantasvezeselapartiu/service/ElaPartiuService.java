@@ -4,7 +4,6 @@ import com.duda.quantasvezeselapartiu.client.GoogleClient;
 import com.duda.quantasvezeselapartiu.client.SpotifyClient;
 import com.duda.quantasvezeselapartiu.model.request.ElaPartiuRequestBuilder;
 import com.duda.quantasvezeselapartiu.model.response.QuantasVezesResponse;
-import com.duda.quantasvezeselapartiu.model.response.SpotifyMusic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
