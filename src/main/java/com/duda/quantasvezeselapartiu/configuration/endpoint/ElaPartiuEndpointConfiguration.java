@@ -16,7 +16,7 @@ public class ElaPartiuEndpointConfiguration {
     public RouterFunction<ServerResponse> routes(ElaPartiuHandler handler){
         return  route(
                     GET("/v1/ela-partiu"),
-                    handler::quantasVezesMono
+                    handler::quantasVezes
         );
     }
 
