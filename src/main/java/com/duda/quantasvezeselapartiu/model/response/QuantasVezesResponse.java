@@ -8,4 +8,5 @@ import lombok.Getter;
 public class QuantasVezesResponse {
     private String musica;
     private Double vezes;
+    private String[] mensagens;
 }

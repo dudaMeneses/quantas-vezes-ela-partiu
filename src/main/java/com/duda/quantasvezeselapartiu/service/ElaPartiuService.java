@@ -1,7 +1,8 @@
 package com.duda.quantasvezeselapartiu.service;
 
-import com.duda.quantasvezeselapartiu.client.GoogleClient;
+import com.duda.quantasvezeselapartiu.client.RouteClient;
 import com.duda.quantasvezeselapartiu.client.SpotifyClient;
+import com.duda.quantasvezeselapartiu.exception.NotFoundException;
 import com.duda.quantasvezeselapartiu.model.request.ElaPartiuRequestBuilder;
 import com.duda.quantasvezeselapartiu.model.response.QuantasVezesResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.math.RoundingMode;
 public class ElaPartiuService {
 
     @Autowired
-    private GoogleClient googleClient;
+    private RouteClient googleClient;
 
     @Autowired
     private SpotifyClient spotifyClient;
@@ -23,13 +24,20 @@ public class ElaPartiuService {
     public Mono<QuantasVezesResponse> quantasVezes(ElaPartiuRequestBuilder request) {
         return Mono.zip(
                 spotifyClient.getSpotifyElaPartiu(),
-                googleClient.getGoogleDirections(request),
-                (spotifyMusic, directionDuration) -> QuantasVezesResponse.builder()
-                        .musica(spotifyMusic.getName())
-                        .vezes(new BigDecimal(directionDuration.doubleValue() / (spotifyMusic.getDuration() / 1000D))
-                                .setScale(2, RoundingMode.HALF_UP)
-                                .doubleValue())
-                        .build()
+                googleClient.getRouteDuration(request),
+                (spotifyMusic, route) -> {
+                    if(route.getDuration().equals(0d)){
+                        throw new NotFoundException(request);
+                    }  else {
+                        return QuantasVezesResponse.builder()
+                                .musica(spotifyMusic.getName())
+                                .vezes(new BigDecimal(route.getDuration() / (spotifyMusic.getDuration() / 1000D))
+                                        .setScale(2, RoundingMode.HALF_UP)
+                                        .doubleValue())
+                                .mensagens(route.getMessages())
+                                .build();
+                    }
+                }
         );
     }
 

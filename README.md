@@ -4,9 +4,9 @@ Reactive application to figure out how many times ``Tim Maia - Ela Partiu`` song
 ## Need to Create
 To make this project work you'll need to create ``resources/external.yml`` file with the following information inside:
 ```yaml
-google:
+route:
   key: API_KEY
-  directions.api: https://maps.googleapis.com/maps/api/directions/json?origin={from}&destination={to}&key=${key}
+  directions.api: http://open.mapquestapi.com/directions/v2/route?key=${key}&from={from}&to={to}
 
 spotify:
   id: SPOTIFY_ID

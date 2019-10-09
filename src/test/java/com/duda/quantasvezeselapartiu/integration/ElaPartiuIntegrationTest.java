@@ -21,11 +21,10 @@ public class ElaPartiuIntegrationTest {
                 .uri("/v1/ela-partiu?from={from}&to={to}", "Porto Alegre", "Florianopolis")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody().json("{\"musica\":\"Ela Partiu\",\"vezes\": 73.62}");
+                .expectBody().json("{\"musica\":\"Ela Partiu\",\"vezes\": 67.4}");
     }
 
     @Test
-    @Ignore
     public void whenCityDoesNotExist_shouldBeErrorMessage(){
         client.get()
                 .uri("/v1/ela-partiu?from={from}&to={to}", "Unexistent City From Hauhauahau", "Florianopolis")

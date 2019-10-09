@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 
 @Getter
 @Component
-@ConfigurationProperties("google")
+@ConfigurationProperties("route")
 @PropertySource(value="classpath:external.yml")
-public class GoogleProperties {
+public class RouteProperties {
 
     @Value("${directions.api}")
     private String directionsUrl;
