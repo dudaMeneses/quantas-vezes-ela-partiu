@@ -14,9 +14,9 @@ public class ElaPartiuEndpointConfiguration {
 
     @Bean
     public RouterFunction<ServerResponse> routes(ElaPartiuHandler handler){
-        return route(
-                GET("/v1/ela-partiu"),
-                handler::quantasVezes
+        return  route(
+                    GET("/v1/ela-partiu"),
+                    handler::quantasVezesMono
         );
     }
 
