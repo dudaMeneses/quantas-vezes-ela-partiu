@@ -21,15 +21,16 @@ public class ElaPartiuService {
     private SpotifyClient spotifyClient;
 
     public Mono<QuantasVezesResponse> quantasVezes(ElaPartiuRequestBuilder request) {
-        return Mono.zip(spotifyClient.getSpotifyElaPartiu(), googleClient.getGoogleDirections(request))
-            .map(tuple ->
-                QuantasVezesResponse.builder()
-                        .musica(tuple.getT1().getName())
-                        .vezes(new BigDecimal(tuple.getT2().doubleValue() / (tuple.getT1().getDuration() / 1000D))
-                                        .setScale(2, RoundingMode.HALF_UP)
-                                        .doubleValue())
+        return Mono.zip(
+                spotifyClient.getSpotifyElaPartiu(),
+                googleClient.getGoogleDirections(request),
+                (spotifyMusic, directionDuration) -> QuantasVezesResponse.builder()
+                        .musica(spotifyMusic.getName())
+                        .vezes(new BigDecimal(directionDuration.doubleValue() / (spotifyMusic.getDuration() / 1000D))
+                                .setScale(2, RoundingMode.HALF_UP)
+                                .doubleValue())
                         .build()
-            );
+        );
     }
 
 }
