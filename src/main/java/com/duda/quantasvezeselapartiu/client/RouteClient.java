@@ -13,6 +13,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Component
 public class RouteClient {
@@ -43,15 +47,11 @@ public class RouteClient {
     }
 
     private List<String> getMessageValues(JsonNode jsonNode) {
-        JsonNode messagesNode = jsonNode.path("info").get("messages");
-
         List<String> messages = new ArrayList<>();
 
-        if(messagesNode.isArray()){
-            for(final JsonNode message : messagesNode){
-                messages.add(message.textValue());
-            }
-        }
+        Iterable messagesNodeIterable = () -> jsonNode.path("info").withArray("messages").elements();
+        StreamSupport.stream(messagesNodeIterable.spliterator(), false)
+            .forEach(message -> messages.add(message.toString()));
 
         return messages;
     }
