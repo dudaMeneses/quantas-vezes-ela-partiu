@@ -1,6 +1,7 @@
 package com.duda.quantasvezeselapartiu.client;
 
 import com.duda.quantasvezeselapartiu.configuration.property.SpotifyProperties;
+import com.duda.quantasvezeselapartiu.exception.MusicNotFoundException;
 import com.duda.quantasvezeselapartiu.exception.SpotifyCredentialException;
 import com.duda.quantasvezeselapartiu.model.response.SpotifyMusic;
 import com.duda.quantasvezeselapartiu.model.response.SpotifyToken;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Base64;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromFormData;
@@ -28,7 +30,8 @@ public class SpotifyClient {
                         .get()
                         .retrieve()
                         .bodyToMono(SpotifyMusic.class)
-        );
+                        .switchIfEmpty(Mono.error(new MusicNotFoundException()))
+        ).timeout(Duration.ofSeconds(2));
     }
 
     private Mono<SpotifyToken> getSpotifyAccessToken() {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -40,7 +41,7 @@ public class RouteClient {
                         throw new NotFoundException(request);
                     }
                 })
-                .doOnError(Mono::error);
+                .timeout(Duration.ofSeconds(5));
     }
 
     private List<String> getMessageValues(JsonNode jsonNode) {
