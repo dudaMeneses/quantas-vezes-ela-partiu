@@ -25,9 +25,17 @@ public class ElaPartiuIntegrationTest {
     }
 
     @Test
-    public void whenCityDoesNotExist_shouldBeErrorMessage(){
+    public void whenFromCityDoesNotExist_shouldBeErrorMessage(){
         client.get()
                 .uri("/v1/ela-partiu?from={from}&to={to}", "Unexistent City From Hauhauahau", "Florianopolis")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    public void whenToCityDoesNotExist_shouldBeErrorMessage(){
+        client.get()
+                .uri("/v1/ela-partiu?from={from}&to={to}", "Porto Alegre", "Unexistent City From Hauhauahau")
                 .exchange()
                 .expectStatus().isNotFound();
     }

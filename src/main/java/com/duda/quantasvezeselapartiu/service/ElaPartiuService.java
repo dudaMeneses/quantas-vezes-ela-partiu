@@ -5,6 +5,8 @@ import com.duda.quantasvezeselapartiu.client.SpotifyClient;
 import com.duda.quantasvezeselapartiu.exception.NotFoundException;
 import com.duda.quantasvezeselapartiu.model.request.ElaPartiuRequestBuilder;
 import com.duda.quantasvezeselapartiu.model.response.QuantasVezesResponse;
+import com.duda.quantasvezeselapartiu.model.response.RouteResponse;
+import com.duda.quantasvezeselapartiu.model.response.SpotifyMusic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -25,20 +27,17 @@ public class ElaPartiuService {
         return Mono.zip(
                 spotifyClient.getSpotifyElaPartiu(),
                 googleClient.getRouteDuration(request),
-                (spotifyMusic, route) -> {
-                    if(route.getDuration().equals(0d)){
-                        throw new NotFoundException(request);
-                    }  else {
-                        return QuantasVezesResponse.builder()
-                                .musica(spotifyMusic.getName())
-                                .vezes(new BigDecimal(route.getDuration() / (spotifyMusic.getDuration() / 1000D))
-                                        .setScale(2, RoundingMode.HALF_UP)
-                                        .doubleValue())
-                                .mensagens(route.getMessages())
-                                .build();
-                    }
-                }
+                (music, route) -> QuantasVezesResponse.builder()
+                        .musica(music.getName())
+                        .vezes(quantasVezes(music, route))
+                        .build()
         );
+    }
+
+    private double quantasVezes(SpotifyMusic spotifyMusic, RouteResponse route) {
+        return new BigDecimal(route.getDuration() / (spotifyMusic.getDuration() / 1000D))
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
 }
