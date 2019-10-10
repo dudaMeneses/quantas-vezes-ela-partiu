@@ -33,7 +33,7 @@ public class ElaPartiuService {
         );
     }
 
-    private double quantasVezes(SpotifyMusic spotifyMusic, RouteResponse route) {
+    private Double quantasVezes(SpotifyMusic spotifyMusic, RouteResponse route) {
         return new BigDecimal(route.getDuration() / (spotifyMusic.getDuration() / 1000D))
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
