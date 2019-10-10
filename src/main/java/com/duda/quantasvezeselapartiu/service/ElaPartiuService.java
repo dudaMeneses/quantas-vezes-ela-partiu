@@ -2,7 +2,6 @@ package com.duda.quantasvezeselapartiu.service;
 
 import com.duda.quantasvezeselapartiu.client.RouteClient;
 import com.duda.quantasvezeselapartiu.client.SpotifyClient;
-import com.duda.quantasvezeselapartiu.exception.NotFoundException;
 import com.duda.quantasvezeselapartiu.model.request.ElaPartiuRequestBuilder;
 import com.duda.quantasvezeselapartiu.model.response.QuantasVezesResponse;
 import com.duda.quantasvezeselapartiu.model.response.RouteResponse;

@@ -6,14 +6,12 @@ import com.duda.quantasvezeselapartiu.model.request.ElaPartiuRequestBuilder;
 import com.duda.quantasvezeselapartiu.model.response.RouteResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.List;
 
 @Component
