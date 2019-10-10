@@ -3,6 +3,7 @@ package com.duda.quantasvezeselapartiu.service;
 import com.duda.quantasvezeselapartiu.client.RouteClient;
 import com.duda.quantasvezeselapartiu.client.SpotifyClient;
 import com.duda.quantasvezeselapartiu.exception.NotFoundException;
+import com.duda.quantasvezeselapartiu.exception.SpotifyCredentialException;
 import com.duda.quantasvezeselapartiu.helper.SpotifyMusicHelper;
 import com.duda.quantasvezeselapartiu.model.request.ElaPartiuRequestBuilder;
 import com.duda.quantasvezeselapartiu.model.response.QuantasVezesResponse;
@@ -57,7 +58,28 @@ public class ElaPartiuServiceTest {
     }
 
     @Test
-    public void whenErrorAtRouteClient_shouldBringError(){
+    public void whenErrorAtSpotifyClient_shouldBringBadRequestError(){
+        doReturn(Mono.just(RouteResponse.builder().duration(10000d).build()))
+                .when(routeClient)
+                .getRouteDuration(any());
+
+        doReturn(Mono.error(new SpotifyCredentialException()))
+                .when(spotifyClient)
+                .getSpotifyElaPartiu();
+
+        Mono<QuantasVezesResponse> quantasVezes = elaPartiuService.quantasVezes(
+                ElaPartiuRequestBuilder.builder()
+                        .from("Sao Paulo")
+                        .to("Porto Alegre")
+                        .build()
+        );
+
+        StepVerifier.create(quantasVezes)
+                .verifyErrorMessage("400 BAD_REQUEST \"Invalid credentials to Spotify\"");
+    }
+
+    @Test
+    public void whenErrorAtRouteClient_shouldBringNotFoundError(){
         ElaPartiuRequestBuilder request = ElaPartiuRequestBuilder.builder()
                 .from("Sao Paulo")
                 .to("Porto Alegre")

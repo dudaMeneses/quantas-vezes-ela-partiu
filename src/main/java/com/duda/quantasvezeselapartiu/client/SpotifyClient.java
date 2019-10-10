@@ -1,6 +1,7 @@
 package com.duda.quantasvezeselapartiu.client;
 
 import com.duda.quantasvezeselapartiu.configuration.property.SpotifyProperties;
+import com.duda.quantasvezeselapartiu.exception.SpotifyCredentialException;
 import com.duda.quantasvezeselapartiu.model.response.SpotifyMusic;
 import com.duda.quantasvezeselapartiu.model.response.SpotifyToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ public class SpotifyClient {
                 .post()
                 .body(fromFormData("grant_type", "client_credentials"))
                 .retrieve()
-                .bodyToMono(SpotifyToken.class);
+                .bodyToMono(SpotifyToken.class)
+                .switchIfEmpty(Mono.error(new SpotifyCredentialException()));
     }
 }
