@@ -31,26 +31,34 @@ public class RouteClient {
                 .uri(routeProperties.getDirectionsUrl(), request.getFrom(), request.getTo())
                 .retrieve()
                 .bodyToMono(JsonNode.class)
-                .map(jsonNode -> {
-                    List<String> messages = getMessageValues(jsonNode);
-                    if(messages.isEmpty()){
-                        return RouteResponse.builder()
-                                .duration(jsonNode.path("route").get("time").doubleValue())
-                                .build();
-                    } else {
-                        throw new NotFoundException(request);
-                    }
-                })
+                .flatMap(jsonNode -> getTravelDuration(request, jsonNode))
                 .timeout(Duration.ofSeconds(5));
     }
 
-    private List<String> getMessageValues(JsonNode jsonNode) {
-        List<String> messages = new ArrayList<>();
-
-        Iterable messagesNodeIterable = () -> jsonNode.path("info").withArray("messages").elements();
-        StreamSupport.stream(messagesNodeIterable.spliterator(), false)
-            .forEach(message -> messages.add(message.toString()));
-
-        return messages;
+    private Mono<RouteResponse> getTravelDuration(ElaPartiuRequestBuilder request, JsonNode jsonNode) {
+        return Mono.just(jsonNode)
+                .flatMap(node -> validateErrorMessages(request, node))
+                .flatMap(this::getTravelDuration)
+                .switchIfEmpty(Mono.error(new NotFoundException(request)));
     }
+
+    private Mono<RouteResponse> getTravelDuration(JsonNode jsonNode) {
+        return Mono.justOrEmpty(jsonNode)
+                .map(node -> node.path("route"))
+                .map(node -> node.get("time"))
+                .map(JsonNode::doubleValue)
+                .defaultIfEmpty(0D)
+                .map(travelTime -> RouteResponse.builder()
+                        .duration(travelTime)
+                        .build());
+    }
+
+    private Mono<JsonNode> validateErrorMessages(ElaPartiuRequestBuilder request, JsonNode jsonNode) {
+        return Mono.just(jsonNode)
+                .map(node -> node.path("info"))
+                .map(node -> node.withArray("messages"))
+                .map(JsonNode::elements)
+                .flatMap(iterator -> iterator.hasNext() ? Mono.error(new NotFoundException(request)) : Mono.justOrEmpty(jsonNode));
+    }
+
 }
